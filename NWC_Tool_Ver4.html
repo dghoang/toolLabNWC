@@ -1,0 +1,1117 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Công cụ IP Siêu Cấp cho Kỹ Sư Mạng</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #f0f4f8; }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+        
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: #e0e7ff; border-radius: 10px; }
+        ::-webkit-scrollbar-thumb { background: #6366f1; border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: #4f46e5; }
+
+        .table-cell-custom, .allocation-table-cell {
+            padding: 0.5rem 0.75rem; 
+            vertical-align: middle; 
+            font-size: 0.875rem; 
+            cursor: pointer;
+            transition: background-color 0.2s ease-in-out;
+            border-bottom: 1px solid #e5e7eb; 
+        }
+        .table-cell-custom:hover, .allocation-table-cell:hover { background-color: #e0e7ff; }
+        
+        .network-block {
+            border: 1px solid #d1d5db; 
+            border-radius: 0.75rem; 
+            padding: 1.5rem; 
+            margin-bottom: 1.5rem; 
+            background-color: #ffffff;
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06);
+        }
+        .tab-button {
+            transition: all 0.3s ease-in-out;
+            border-bottom-width: 3px; 
+            border-bottom-color: transparent;
+            padding-top: 0.875rem; 
+            padding-bottom: 0.875rem;
+        }
+        .tab-button.active-tab {
+            color: #4f46e5; 
+            border-bottom-color: #4f46e5;
+            background-color: #eef2ff; 
+        }
+        .input-field, .select-field {
+            width: 100%;
+            padding: 0.625rem; 
+            border: 1px solid #d1d5db; 
+            border-radius: 0.375rem; 
+            box-shadow: inset 0 1px 2px rgba(0,0,0,0.05);
+            transition: border-color 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+        }
+        .input-field:focus, .select-field:focus {
+            border-color: #4f46e5; 
+            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.3); 
+            outline: none;
+        }
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0.625rem 1.25rem; 
+            font-weight: 600; 
+            border-radius: 0.375rem; 
+            box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+            transition: all 0.2s ease-in-out;
+        }
+        .btn-primary { background-color: #4f46e5; color: white; }
+        .btn-primary:hover { background-color: #4338ca; }
+        .btn-danger { background-color: #ef4444; color: white; }
+        .btn-danger:hover { background-color: #dc2626; }
+        .btn-success { background-color: #22c55e; color: white; }
+        .btn-success:hover { background-color: #16a34a; }
+
+        .icon-sm { width: 1.125rem; height: 1.125rem; margin-right: 0.375rem;} 
+        .icon-md { width: 1.25rem; height: 1.25rem; margin-right: 0.5rem;}
+        
+        .wan-options { display: none; }
+        .wan-options.active { display: block; }
+
+        .allocation-section {
+             padding: 1.25rem; 
+             background-color: #f9fafb; 
+             border-radius: 0.5rem; 
+             box-shadow: 0 2px 4px rgba(0,0,0,0.05); 
+             border: 1px solid #e5e7eb; 
+        }
+    </style>
+</head>
+<body class="bg-slate-100 min-h-screen p-4 md:p-6">
+    <div class="container mx-auto max-w-full xl:max-w-screen-2xl bg-white shadow-2xl rounded-xl overflow-hidden">
+        <!-- Tab Buttons -->
+        <div class="flex border-b border-gray-300 bg-gray-50 sticky top-0 z-40">
+            <button class="tab-button flex-1 focus:outline-none active-tab" data-tab="calculator">
+                <svg class="icon-md inline-block" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M9 17.25v1.007a3 3 0 0 1-.375 .75A2.25 2.25 0 0 0 6 21H3.75A2.25 2.25 0 0 0 1.5 18.75V16.5a2.25 2.25 0 0 0 2.25-2.25h1.5A2.25 2.25 0 0 0 7.5 16.5v1.875c0 .621.504 1.125 1.125 1.125h1.125c.621 0 1.125-.504 1.125-1.125V17.25m0 3V6m0 14.25H15m0 0h1.5V18a2.25 2.25 0 0 0 2.25-2.25v-1.5a2.25 2.25 0 0 0-2.25-2.25H15M9 6.75v1.007a3 3 0 0 1-.375 .75A2.25 2.25 0 0 0 6 9H3.75A2.25 2.25 0 0 0 1.5 6.75V4.5A2.25 2.25 0 0 0 3.75 2.25h1.5A2.25 2.25 0 0 0 7.5 4.5v1.875c0 .621.504 1.125 1.125 1.125h1.125c.621 0 1.125-.504 1.125-1.125V6.75m0-3V15m0-14.25H15m0 0h1.5V6a2.25 2.25 0 0 0 2.25-2.25V2.25A2.25 2.25 0 0 0 16.5 0H15" /></svg>
+                Tính Toán IP (VLSM)
+            </button>
+            <button class="tab-button flex-1 focus:outline-none" data-tab="device_allocation">
+                <svg class="icon-md inline-block" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M10.5 6h9.75M10.5 6a1.5 1.5 0 1 1-3 0m3 0a1.5 1.5 0 1 0-3 0M3.75 6H7.5m3 12h9.75m-9.75 0a1.5 1.5 0 0 1-3 0m3 0a1.5 1.5 0 0 0-3 0m-3.75 0H7.5m9-6h3.75m-3.75 0a1.5 1.5 0 0 1-3 0m3 0a1.5 1.5 0 0 0-3 0m-9.75 0h9.75" /></svg>
+                Phân Bổ IP Thiết Bị
+            </button>
+            <button class="tab-button flex-1 focus:outline-none" data-tab="cli">
+                <svg class="icon-md inline-block" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M6.75 7.5l3 2.25-3 2.25m4.5 0h3m-9 8.25h13.5A2.25 2.25 0 0 0 21 18V6a2.25 2.25 0 0 0-2.25-2.25H5.25A2.25 2.25 0 0 0 3 6v12a2.25 2.25 0 0 0 2.25 2.25Z" /></svg>
+                Tạo Lệnh CLI
+            </button>
+            <button class="tab-button flex-1 focus:outline-none" data-tab="pt_tools">
+                <svg class="icon-md inline-block" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M6.429 9.75L2.25 12l4.179 2.25m0-4.5l5.571 3 5.571-3m-11.142 0L2.25 7.5 12 2.25l9.75 5.25-3.75 2.25M12 13.5l-3.75 2.25L12 18l3.75-2.25L12 13.5Zm0 0L16.125 11.25m-4.125 2.25L9.375 11.25M12 3.75l-3.75 2.25L12 8.25l3.75-2.25L12 3.75Z" /></svg>
+                Công Cụ Packet Tracer
+            </button>
+        </div>
+
+        <div id="messageArea" class="p-4 text-sm text-white rounded-md hidden fixed top-6 right-6 z-[100] shadow-lg max-w-md"></div>
+
+        <!-- IP Calculator Tab -->
+        <div id="calculatorContent" class="tab-content active p-6 md:p-8">
+            <div id="allNetworkBlocksContainer" class="space-y-8">
+                <!-- Network blocks will be added here -->
+            </div>
+
+            <div class="mt-10 flex flex-col sm:flex-row gap-4">
+                <button id="addNetworkBlockBtn" class="btn btn-primary bg-purple-600 hover:bg-purple-700">
+                    <svg class="icon-sm" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" /></svg>
+                    Thêm Khối Mạng
+                </button>
+                <button id="calculateAllBtn" class="btn btn-primary">
+                    <svg class="icon-sm" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 15.75V18m-7.5-6.75h.008v.008H8.25v-.008Zm0 2.25h.008v.008H8.25V13.5Zm0 2.25h.008v.008H8.25v-.008Zm0 2.25h.008v.008H8.25V18Zm2.498-6.75h.007v.008h-.007v-.008Zm0 2.25h.007v.008h-.007V13.5Zm0 2.25h.007v.008h-.007v-.008Zm0 2.25h.007v.008h-.007V18Zm2.504-6.75h.008v.008h-.008v-.008Zm0 2.25h.008v.008h-.008V13.5Zm0 2.25h.008v.008h-.008v-.008Zm0 2.25h.008v.008h-.008V18Zm2.498-6.75h.008v.008h-.008v-.008Zm0 2.25h.008v.008h-.008V13.5ZM8.25 6h7.5v2.25h-7.5V6ZM12 2.25c-1.892 0-3.758.11-5.593.322C5.307 2.7 4.5 3.65 4.5 4.757V19.5a2.25 2.25 0 0 0 2.25 2.25h10.5a2.25 2.25 0 0 0 2.25-2.25V4.757c0-1.108-.806-2.057-1.907-2.185A48.507 48.507 0 0 0 12 2.25Z" /></svg>
+                    Tính Toán Tất Cả
+                </button>
+            </div>
+
+            <h2 class="text-2xl font-bold text-gray-800 mt-10 mb-5">Kết Quả Chia Mạng VLSM</h2>
+            <div class="overflow-x-auto bg-white rounded-lg shadow-md">
+                <table id="resultsTable" class="min-w-full divide-y divide-gray-200">
+                    <thead class="bg-indigo-50">
+                        <tr>
+                            <th class="table-cell-custom text-left text-xs font-semibold text-indigo-700 uppercase tracking-wider">Khối Nguồn</th>
+                            <th class="table-cell-custom text-left text-xs font-semibold text-indigo-700 uppercase tracking-wider">Tên Segment</th>
+                            <th class="table-cell-custom text-left text-xs font-semibold text-indigo-700 uppercase tracking-wider">Loại</th>
+                            <th class="table-cell-custom text-left text-xs font-semibold text-indigo-700 uppercase tracking-wider">Địa chỉ Mạng/CIDR</th>
+                            <th class="table-cell-custom text-left text-xs font-semibold text-indigo-700 uppercase tracking-wider">Broadcast</th>
+                            <th class="table-cell-custom text-left text-xs font-semibold text-indigo-700 uppercase tracking-wider">Subnet Mask</th>
+                            <th class="table-cell-custom text-left text-xs font-semibold text-indigo-700 uppercase tracking-wider">IP Endpoint 1 / Router</th>
+                            <th class="table-cell-custom text-left text-xs font-semibold text-indigo-700 uppercase tracking-wider">IP Endpoint 2 / Switch</th>
+                            <th class="table-cell-custom text-left text-xs font-semibold text-indigo-700 uppercase tracking-wider">IP Thiết Bị Đầu Tiên</th>
+                            <th class="table-cell-custom text-left text-xs font-semibold text-indigo-700 uppercase tracking-wider">IP Cuối</th>
+                            <th class="table-cell-custom text-right text-xs font-semibold text-indigo-700 uppercase tracking-wider">Số IP Dùng Được</th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white divide-y divide-gray-200"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Device IP Allocation Tab -->
+        <div id="device_allocationContent" class="tab-content p-6 md:p-8">
+            <h2 class="text-2xl font-bold text-gray-800 mb-6">
+                <svg class="icon-md inline-block text-indigo-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M10.5 6h9.75M10.5 6a1.5 1.5 0 1 1-3 0m3 0a1.5 1.5 0 1 0-3 0M3.75 6H7.5m3 12h9.75m-9.75 0a1.5 1.5 0 0 1-3 0m3 0a1.5 1.5 0 0 0-3 0m-3.75 0H7.5m9-6h3.75m-3.75 0a1.5 1.5 0 0 1-3 0m3 0a1.5 1.5 0 0 0-3 0m-9.75 0h9.75" /></svg>
+                Phân Bổ IP Thiết Bị Trong LAN/WAN
+            </h2>
+            <div id="deviceAllocationContainer" class="space-y-8">
+                <p class="text-gray-600 italic p-4 bg-slate-100 rounded-md">Vui lòng tính toán ở tab "Tính Toán IP (VLSM)" trước. Các LAN/WAN hợp lệ sẽ được liệt kê ở đây.</p>
+            </div>
+        </div>
+        
+        <!-- CLI Generator Tab -->
+        <div id="cliContent" class="tab-content p-6 md:p-8">
+            <h2 class="text-2xl font-bold text-gray-800 mb-6">
+                 <svg class="icon-md inline-block text-teal-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M6.75 7.5l3 2.25-3 2.25m4.5 0h3m-9 8.25h13.5A2.25 2.25 0 0 0 21 18V6a2.25 2.25 0 0 0-2.25-2.25H5.25A2.25 2.25 0 0 0 3 6v12a2.25 2.25 0 0 0 2.25 2.25Z" /></svg>
+                Tạo Lệnh CLI Cho Switch
+            </h2>
+             <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                <div>
+                    <label for="configName" class="block text-sm font-medium text-gray-700 mb-1">Tên Định Danh (VD: HE1910897)</label>
+                    <input type="text" id="configName" value="HE1910897" class="input-field">
+                </div>
+                <div>
+                    <label for="bannerUser" class="block text-sm font-medium text-gray-700 mb-1">Người Cấu Hình (Banner)</label>
+                    <input type="text" id="bannerUser" value="Duong Minh Hoang HE191087" class="input-field">
+                </div>
+            </div>
+            <button id="generateCliBtn" class="btn btn-primary bg-teal-600 hover:bg-teal-700">
+                <svg class="icon-sm" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L6.832 19.82a4.5 4.5 0 0 1-1.897 1.13l-2.685.8.8-2.685a4.5 4.5 0 0 1 1.13-1.897L16.863 4.487Zm0 0L19.5 7.125" /></svg>
+                Tạo Lệnh CLI
+            </button>
+
+            <div id="cliResultsContainer" class="mt-6 space-y-6"></div>
+        </div>
+
+        <!-- Packet Tracer Tools Tab -->
+        <div id="pt_toolsContent" class="tab-content p-6 md:p-8">
+            <h2 class="text-2xl font-bold text-gray-800 mb-6">
+                <svg class="icon-md inline-block text-purple-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M6.429 9.75L2.25 12l4.179 2.25m0-4.5l5.571 3 5.571-3m-11.142 0L2.25 7.5 12 2.25l9.75 5.25-3.75 2.25M12 13.5l-3.75 2.25L12 18l3.75-2.25L12 13.5Zm0 0L16.125 11.25m-4.125 2.25L9.375 11.25M12 3.75l-3.75 2.25L12 8.25l3.75-2.25L12 3.75Z" /></svg>
+                Công Cụ Packet Tracer & Thực Tế
+            </h2>
+            
+            <div class="mb-8 p-4 bg-slate-800 text-slate-100 rounded-lg shadow flex items-center justify-between">
+                <div>
+                    <label for="defaultRouteInterface" class="block text-xs text-slate-300 mb-1">Interface cho Default Route:</label>
+                    <input type="text" id="defaultRouteInterface" value="Serial0/0/0" class="input-field bg-slate-700 text-slate-100 border-slate-600 text-sm py-1 px-2 w-auto inline-block mr-2">
+                    <code id="defaultRouteCommandPreview" class="text-sm sm:text-base">ip route 0.0.0.0 0.0.0.0 Serial0/0/0</code>
+                </div>
+                <button id="copyDefaultRouteBtn" class="btn btn-sm btn-secondary bg-sky-500 hover:bg-sky-600 text-xs sm:text-sm py-1.5 px-3">
+                    <svg class="icon-sm mr-1" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M15.666 3.888A2.25 2.25 0 0 0 13.5 2.25h-3c-1.03 0-1.9.693-2.166 1.638m7.332 0c.055.194.084.4.084.612v0a.75.75 0 0 1-.75.75H9a.75.75 0 0 1-.75-.75v0c0-.212.03-.418.084-.612m7.332 0c.646.049 1.288.11 1.927.184 1.1.128 1.907 1.077 1.907 2.185V19.5a2.25 2.25 0 0 1-2.25 2.25H6.75A2.25 2.25 0 0 1 4.5 19.5V6.257c0-1.108.806-2.057 1.907-2.185a48.208 48.208 0 0 1 1.927-.184" /></svg>
+                    Copy Lệnh
+                </button>
+            </div>
+
+            <h3 class="text-xl font-semibold text-gray-700 mt-8 mb-3">Bảng Tra Cứu Subnet Mask</h3>
+            <div class="overflow-x-auto bg-white rounded-lg shadow-md">
+                <table id="subnetLookupTable" class="min-w-full divide-y divide-gray-200">
+                    <thead class="bg-indigo-50">
+                        <tr>
+                            <th class="table-cell-custom text-left text-xs font-semibold text-indigo-700 uppercase tracking-wider">Prefix (/)</th>
+                            <th class="table-cell-custom text-left text-xs font-semibold text-indigo-700 uppercase tracking-wider">Subnet Mask</th>
+                            <th class="table-cell-custom text-left text-xs font-semibold text-indigo-700 uppercase tracking-wider">Mask Nhị Phân</th>
+                            <th class="table-cell-custom text-right text-xs font-semibold text-indigo-700 uppercase tracking-wider">Số Bit Host</th>
+                            <th class="table-cell-custom text-right text-xs font-semibold text-indigo-700 uppercase tracking-wider">Tổng Host (Bước nhảy)</th>
+                            <th class="table-cell-custom text-right text-xs font-semibold text-indigo-700 uppercase tracking-wider">Host Thực Tế</th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white divide-y divide-gray-200"></tbody>
+                </table>
+            </div>
+
+            <h3 class="text-xl font-semibold text-gray-700 mt-10 mb-3">Lệnh Cisco IOS Thường Dùng</h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                <div class="p-3 bg-slate-100 rounded-md shadow">
+                    <h4 class="font-medium text-slate-700 mb-1">Xem thông tin</h4>
+                    <ul class="list-disc list-inside text-sm text-slate-600 space-y-0.5">
+                        <li class="hover:text-indigo-600 cursor-pointer" onclick="copyToClipboard('show ip interface brief')"><code>show ip interface brief</code></li>
+                        <li class="hover:text-indigo-600 cursor-pointer" onclick="copyToClipboard('show interfaces')"><code>show interfaces</code></li>
+                        <li class="hover:text-indigo-600 cursor-pointer" onclick="copyToClipboard('show ip route')"><code>show ip route</code></li>
+                        <li class="hover:text-indigo-600 cursor-pointer" onclick="copyToClipboard('show running-config')"><code>show running-config</code></li>
+                        <li class="hover:text-indigo-600 cursor-pointer" onclick="copyToClipboard('show startup-config')"><code>show startup-config</code></li>
+                        <li class="hover:text-indigo-600 cursor-pointer" onclick="copyToClipboard('show version')"><code>show version</code></li>
+                        <li class="hover:text-indigo-600 cursor-pointer" onclick="copyToClipboard('show cdp neighbors detail')"><code>show cdp neighbors detail</code></li>
+                    </ul>
+                </div>
+                <div class="p-3 bg-slate-100 rounded-md shadow">
+                    <h4 class="font-medium text-slate-700 mb-1">Cấu hình cơ bản</h4>
+                     <ul class="list-disc list-inside text-sm text-slate-600 space-y-0.5">
+                        <li class="hover:text-indigo-600 cursor-pointer" onclick="copyToClipboard('enable')"><code>enable</code></li>
+                        <li class="hover:text-indigo-600 cursor-pointer" onclick="copyToClipboard('configure terminal')"><code>configure terminal</code></li>
+                        <li class="hover:text-indigo-600 cursor-pointer" onclick="copyToClipboard('hostname R1')"><code>hostname R1</code></li>
+                        <li class="hover:text-indigo-600 cursor-pointer" onclick="copyToClipboard('interface GigabitEthernet0/0')"><code>interface GigabitEthernet0/0</code></li>
+                        <li class="hover:text-indigo-600 cursor-pointer" onclick="copyToClipboard('ip address 192.168.1.1 255.255.255.0')"><code>ip address [ip] [mask]</code></li>
+                        <li class="hover:text-indigo-600 cursor-pointer" onclick="copyToClipboard('no shutdown')"><code>no shutdown</code></li>
+                        <li class="hover:text-indigo-600 cursor-pointer" onclick="copyToClipboard('exit')"><code>exit</code></li>
+                        <li class="hover:text-indigo-600 cursor-pointer" onclick="copyToClipboard('end')"><code>end</code></li>
+                    </ul>
+                </div>
+                <div class="p-3 bg-slate-100 rounded-md shadow">
+                    <h4 class="font-medium text-slate-700 mb-1">Lưu & Xóa cấu hình</h4>
+                     <ul class="list-disc list-inside text-sm text-slate-600 space-y-0.5">
+                        <li class="hover:text-indigo-600 cursor-pointer" onclick="copyToClipboard('copy running-config startup-config')"><code>copy running-config startup-config</code></li>
+                        <li class="hover:text-indigo-600 cursor-pointer" onclick="copyToClipboard('write memory')"><code>write memory</code></li>
+                        <li class="hover:text-indigo-600 cursor-pointer" onclick="copyToClipboard('erase startup-config')"><code>erase startup-config</code></li>
+                        <li class="hover:text-indigo-600 cursor-pointer" onclick="copyToClipboard('reload')"><code>reload</code></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        // Helper functions for IP calculations
+        function ipToLong(ip) {
+            if (!/^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$/.test(ip)) return NaN;
+            return ip.split('.').reduce((acc, octet) => (acc << 8) + parseInt(octet, 10), 0) >>> 0;
+        }
+
+        function longToIp(long) {
+            if (isNaN(long) || long < 0 || long > 0xFFFFFFFF) return null;
+            return `${(long >>> 24)}.${(long >> 16) & 255}.${(long >> 8) & 255}.${long & 255}`;
+        }
+
+        function getNeededHostBits(numHosts, isWanP2P, numWanEndpoints = 2) {
+            if (isWanP2P) return 2; // /30 for P2P WAN (2 usable IPs)
+            // For multi-access WAN or LAN:
+            // We need N usable IPs, so 2^hostBits - 2 >= N_devices
+            // Therefore, 2^hostBits >= N_devices + 2
+            if (numHosts <= 0) return 0; // Invalid for LAN
+            return Math.ceil(Math.log2(numHosts + 2));
+        }
+
+
+        function cidrToMask(cidr) {
+            if (cidr < 0 || cidr > 32) return null;
+            if (cidr === 0) return "0.0.0.0";
+            const maskLong = (0xFFFFFFFF << (32 - cidr)) >>> 0;
+            return longToIp(maskLong);
+        }
+        
+        function getMaskLongFromCidr(cidr) {
+            if (cidr < 0 || cidr > 32) return 0;
+            return (0xFFFFFFFF << (32 - cidr)) >>> 0;
+        }
+
+        function decToBinary(decimal) {
+            let binary = parseInt(decimal).toString(2);
+            while (binary.length < 8) {
+                binary = "0" + binary;
+            }
+            return binary;
+        }
+
+        function ipToBinary(ip) {
+            if (!ip || typeof ip !== 'string') return 'N/A';
+            return ip.split('.').map(decToBinary).join('.');
+        }
+
+
+        let calculatedSubnetsStore = []; 
+        const messageArea = document.getElementById('messageArea');
+        let networkBlockCounter = 0;
+        // Store counters for segment naming within each block
+        let segmentCounters = {}; // { blockId: { lan: 0, wan: 0 } }
+
+
+        function showMessage(text, type = 'info', duration = 3500) {
+            messageArea.textContent = text;
+            messageArea.className = 'p-4 text-sm text-white rounded-lg shadow-xl fixed top-6 right-6 z-[100] max-w-md transform transition-all duration-300 ease-out'; 
+            let iconHTML = '';
+            if (type === 'error') {
+                messageArea.classList.add('bg-red-600');
+                iconHTML = '<svg class="icon-sm inline-block mr-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126ZM12 15.75h.007v.008H12v-.008Z" /></svg>';
+            } else if (type === 'success') {
+                messageArea.classList.add('bg-green-600');
+                iconHTML = '<svg class="icon-sm inline-block mr-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" /></svg>';
+            } else if (type === 'warning') {
+                messageArea.classList.add('bg-amber-500');
+                 iconHTML = '<svg class="icon-sm inline-block mr-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m9-.75a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9 3.75h.008v.008H12v-.008Z" /></svg>';
+            }
+            else { // info
+                messageArea.classList.add('bg-blue-600');
+                iconHTML = '<svg class="icon-sm inline-block mr-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="m11.25 11.25.041-.02a.75.75 0 0 1 1.063.852l-.708 2.836a.75.75 0 0 0 1.063.853l.041-.021M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9-3.75h.008v.008H12V8.25Z" /></svg>';
+            }
+            messageArea.innerHTML = iconHTML + text;
+            messageArea.classList.remove('hidden', 'opacity-0', 'translate-x-full');
+            messageArea.classList.add('opacity-100', 'translate-x-0');
+            
+            setTimeout(() => {
+                 messageArea.classList.remove('opacity-100', 'translate-x-0');
+                 messageArea.classList.add('opacity-0', 'translate-x-full');
+                 setTimeout(() => messageArea.classList.add('hidden'), 300);
+            }, duration);
+        }
+
+        // Tab switching logic
+        const tabButtons = document.querySelectorAll('.tab-button');
+        const tabContents = document.querySelectorAll('.tab-content');
+        tabButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                tabButtons.forEach(btn => btn.classList.remove('active-tab'));
+                button.classList.add('active-tab');
+                const targetTab = button.dataset.tab;
+                tabContents.forEach(content => {
+                    content.id === `${targetTab}Content` ? content.classList.add('active') : content.classList.remove('active');
+                });
+                if (targetTab === 'cli' && calculatedSubnetsStore.length > 0) {
+                    document.getElementById('generateCliBtn').click();
+                }
+                if (targetTab === 'device_allocation') {
+                    populateDeviceAllocationTab();
+                }
+                if (targetTab === 'pt_tools') { // Changed from subnet_lookup
+                    populateSubnetLookupTable(); // Still populate this table within PT tools
+                }
+            });
+        });
+        
+        // --- IP Calculator Logic ---
+        const allNetworkBlocksContainer = document.getElementById('allNetworkBlocksContainer');
+        const addNetworkBlockBtn = document.getElementById('addNetworkBlockBtn');
+        const calculateAllBtn = document.getElementById('calculateAllBtn');
+        const resultsTableBody = document.getElementById('resultsTable').getElementsByTagName('tbody')[0];
+
+        function createSegmentEntryHTML(blockId) { // Pass blockId for naming
+            const segmentId = `segment-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+            // Auto-naming logic will be handled when adding the segment
+            return `
+                <div class="segment-entry flex flex-col md:flex-row items-start md:items-center gap-3 p-3.5 bg-slate-50 rounded-lg border border-slate-200 shadow-sm" id="${segmentId}" data-block-id="${blockId}">
+                    <div class="flex-grow w-full md:w-1/4">
+                        <label class="block text-xs font-medium text-gray-600 mb-0.5">Tên Segment</label>
+                        <input type="text" class="segment-name input-field text-sm" placeholder="Tự động...">
+                    </div>
+                    <div class="flex-grow w-full md:w-1/4">
+                        <label class="block text-xs font-medium text-gray-600 mb-0.5">Loại Segment</label>
+                        <select class="segment-type select-field text-sm">
+                            <option value="LAN" selected>LAN</option>
+                            <option value="WAN_P2P">WAN (Point-to-Point)</option>
+                            <option value="WAN_MULTI">WAN (Multi-Access)</option>
+                        </select>
+                    </div>
+                    <div class="flex-grow w-full md:w-1/4 segment-hosts-container">
+                        <label class="block text-xs font-medium text-gray-600 mb-0.5">Số Hosts</label>
+                        <input type="number" min="1" class="segment-hosts input-field text-sm" placeholder="VD: 50">
+                    </div>
+                    <div class="flex-grow w-full md:w-1/4 wan-options">
+                        <label class="block text-xs font-medium text-gray-600 mb-0.5">Số Endpoints (WAN Multi)</label>
+                        <input type="number" min="2" class="segment-wan-endpoints input-field text-sm" value="3">
+                    </div>
+                    <button class="remove-segment-btn btn btn-danger btn-sm py-1.5 px-2.5 text-xs mt-3 md:mt-4 self-center md:self-auto">
+                        <svg class="icon-sm mr-1" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12.576 0c1.256-.607 2.66-1.169 4.142-1.58m11.15-1.42L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0L18.16 19.673" /></svg>
+                        Xóa
+                    </button>
+                </div>`;
+        }
+        
+        function handleSegmentTypeChange(event) {
+            const segmentEntry = event.target.closest('.segment-entry');
+            const segmentType = event.target.value;
+            const hostsContainer = segmentEntry.querySelector('.segment-hosts-container');
+            const wanEndpointsContainer = segmentEntry.querySelector('.wan-options');
+            const hostsInput = segmentEntry.querySelector('.segment-hosts');
+
+            if (segmentType === 'LAN') {
+                hostsContainer.style.display = 'block';
+                wanEndpointsContainer.style.display = 'none';
+                hostsInput.placeholder = "VD: 50";
+            } else if (segmentType === 'WAN_P2P') {
+                hostsContainer.style.display = 'none'; // Or make it read-only with 2 hosts
+                wanEndpointsContainer.style.display = 'none';
+                hostsInput.value = '2'; // Automatically set for P2P
+            } else if (segmentType === 'WAN_MULTI') {
+                hostsContainer.style.display = 'none'; // Hosts determined by endpoints
+                wanEndpointsContainer.style.display = 'block';
+            }
+            updateAutoSegmentName(segmentEntry);
+        }
+
+        function updateAutoSegmentName(segmentElement) {
+            const blockId = segmentElement.dataset.blockId;
+            const segmentType = segmentElement.querySelector('.segment-type').value;
+            const segmentNameInput = segmentElement.querySelector('.segment-name');
+            
+            if (!segmentCounters[blockId]) { // Should have been initialized
+                segmentCounters[blockId] = { LAN: 0, WAN_P2P: 0, WAN_MULTI: 0 };
+            }
+            
+            // This logic needs to be smarter if names are generated *after* user might have typed.
+            // For now, let's assume it's for placeholder or initial fill.
+            // A better approach is to count existing segments of this type in this block *before* this one.
+            let count = 0;
+            const allSegmentsInBlock = document.querySelectorAll(`.segment-entry[data-block-id="${blockId}"]`);
+            allSegmentsInBlock.forEach(seg => {
+                if (seg.id !== segmentElement.id && seg.querySelector('.segment-type').value === segmentType) {
+                    // Check if the name looks like an auto-generated one to correctly increment
+                    const existingName = seg.querySelector('.segment-name').value;
+                    if (existingName.startsWith(segmentType.replace('_', ''))) {
+                         count++; // This is a simplification, might need regex for robustness
+                    }
+                }
+            });
+             // Increment based on how many *other* segments of the same type exist
+            let typePrefix = segmentType.replace('_', ''); // LAN, WANP2P, WANMULTI
+            let currentCounterForType = 0;
+            allSegmentsInBlock.forEach( siblingSegment => {
+                if (siblingSegment === segmentElement) return; // Don't count itself
+                if (siblingSegment.querySelector('.segment-type').value === segmentType) {
+                    const name = siblingSegment.querySelector('.segment-name').value;
+                    if (name.startsWith(typePrefix)) {
+                         const num = parseInt(name.substring(typePrefix.length));
+                         if (!isNaN(num) && num > currentCounterForType) {
+                             currentCounterForType = num;
+                         }
+                    }
+                }
+            });
+            currentCounterForType++;
+
+
+            segmentNameInput.placeholder = `${typePrefix}${currentCounterForType}`;
+            if (!segmentNameInput.value) { // Only fill if empty
+                 segmentNameInput.value = `${typePrefix}${currentCounterForType}`;
+            }
+        }
+
+
+        function createNetworkBlockHTML() {
+            networkBlockCounter++;
+            const blockId = `networkBlock-${networkBlockCounter}`;
+            segmentCounters[blockId] = { LAN: 0, WAN_P2P: 0, WAN_MULTI: 0 }; // Initialize counters for this block
+
+            const div = document.createElement('div');
+            div.className = 'network-block';
+            div.id = blockId;
+            div.innerHTML = `
+                <div class="flex justify-between items-center mb-5">
+                    <h3 class="text-xl font-semibold text-indigo-700">
+                        <svg class="icon-md inline-block text-indigo-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M8.288 15.038a5.25 5.25 0 0 1 7.424 0M5.106 11.856c3.807-3.808 9.98-3.808 13.788 0M1.924 8.674c5.565-5.565 14.587-5.565 20.152 0M12.53 18.22l-.53.53-.53-.53a.75.75 0 0 1 1.06 0Z" /></svg>
+                        Khối Mạng #${networkBlockCounter}
+                    </h3>
+                    <button class="remove-network-block-btn btn btn-danger btn-sm py-1.5 px-3 text-sm">
+                        <svg class="icon-sm mr-1" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" /></svg>
+                        Xóa Khối
+                    </button>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-5 mb-5">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Địa chỉ IP Cơ Sở (VD: 10.0.0.0)</label>
+                        <input type="text" class="baseIp input-field" value="10.0.0.0">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">CIDR Cơ Sở (VD: 8)</label>
+                        <input type="number" class="baseCidr input-field" value="8" min="0" max="32">
+                    </div>
+                </div>
+                <h4 class="text-md font-semibold text-gray-700 mb-3 mt-4">Các Phân Đoạn Mạng (LAN/Segment) cho Khối #${networkBlockCounter}</h4>
+                <div class="segments-container space-y-3 mb-4">
+                    <!-- Segments will be added here -->
+                </div>
+                <button class="add-segment-to-block-btn btn btn-success btn-sm">
+                     <svg class="icon-sm" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v6m3-3H9m12 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" /></svg>
+                    Thêm Segment vào Khối
+                </button>
+            `;
+            
+            div.querySelector('.remove-network-block-btn').addEventListener('click', () => {
+                delete segmentCounters[blockId]; // Clean up counters
+                div.remove();
+            });
+            
+            const addSegmentButton = div.querySelector('.add-segment-to-block-btn');
+            const segmentsContainer = div.querySelector('.segments-container');
+
+            function addNewSegmentToBlock() {
+                const segmentHTML = createSegmentEntryHTML(blockId);
+                segmentsContainer.insertAdjacentHTML('beforeend', segmentHTML);
+                const newSegmentEl = segmentsContainer.lastElementChild;
+                newSegmentEl.querySelector('.remove-segment-btn').addEventListener('click', () => newSegmentEl.remove());
+                newSegmentEl.querySelector('.segment-type').addEventListener('change', handleSegmentTypeChange);
+                handleSegmentTypeChange({ target: newSegmentEl.querySelector('.segment-type') }); // Trigger initial state
+                updateAutoSegmentName(newSegmentEl); // Set initial auto name
+            }
+            
+            addSegmentButton.addEventListener('click', addNewSegmentToBlock);
+            addNewSegmentToBlock(); // Add one segment by default
+
+            allNetworkBlocksContainer.appendChild(div);
+
+            if (networkBlockCounter === 1) { // Auto-fill example for the very first block
+                const firstBlock = allNetworkBlocksContainer.querySelector('.network-block');
+                const firstSegmentInFirstBlock = firstBlock.querySelector('.segment-entry');
+                if (firstSegmentInFirstBlock) {
+                    // Values set by updateAutoSegmentName and default HTML
+                    firstSegmentInFirstBlock.querySelector('.segment-hosts').value = "100";
+                }
+                addNewSegmentToBlock(); // Add a second segment
+                const secondSegmentEl = segmentsContainer.querySelectorAll('.segment-entry')[1];
+                if (secondSegmentEl) {
+                    secondSegmentEl.querySelector('.segment-type').value = "WAN_P2P";
+                    handleSegmentTypeChange({target: secondSegmentEl.querySelector('.segment-type')});
+                    updateAutoSegmentName(secondSegmentEl);
+                }
+            }
+        }
+
+        addNetworkBlockBtn.addEventListener('click', createNetworkBlockHTML);
+
+        calculateAllBtn.addEventListener('click', () => {
+            resultsTableBody.innerHTML = ''; 
+            calculatedSubnetsStore = []; 
+            let allBlocksValid = true;
+            let calculationOccurred = false;
+
+            document.querySelectorAll('.network-block').forEach((blockElement, blockIndex) => {
+                calculationOccurred = true;
+                const blockId = blockElement.id;
+                const blockNameForMsg = blockElement.querySelector('h3').textContent.trim(); 
+                const baseIpStr = blockElement.querySelector('.baseIp').value;
+                const baseCidr = parseInt(blockElement.querySelector('.baseCidr').value);
+                const blockUserGivenIpLong = ipToLong(baseIpStr);
+
+                if (isNaN(blockUserGivenIpLong)) {
+                    showMessage(`Địa chỉ IP cơ sở không hợp lệ cho ${blockNameForMsg}.`, 'error');
+                    allBlocksValid = false; return;
+                }
+                if (isNaN(baseCidr) || baseCidr < 0 || baseCidr > 32) {
+                    showMessage(`CIDR cơ sở không hợp lệ cho ${blockNameForMsg}.`, 'error');
+                    allBlocksValid = false; return;
+                }
+
+                const segments = [];
+                blockElement.querySelectorAll('.segment-entry').forEach(entry => {
+                    const name = entry.querySelector('.segment-name').value || entry.querySelector('.segment-name').placeholder;
+                    const segmentType = entry.querySelector('.segment-type').value;
+                    let hosts;
+                    let wanEndpoints = 0;
+
+                    if (segmentType === 'LAN') {
+                        hosts = parseInt(entry.querySelector('.segment-hosts').value) || 0;
+                        if (hosts < 1) {
+                            showMessage(`Số hosts cho LAN segment '${name}' trong ${blockNameForMsg} không hợp lệ.`, 'error');
+                            return; 
+                        }
+                    } else if (segmentType === 'WAN_P2P') {
+                        hosts = 2; // 2 usable IPs for /30
+                        wanEndpoints = 2;
+                    } else if (segmentType === 'WAN_MULTI') {
+                        wanEndpoints = parseInt(entry.querySelector('.segment-wan-endpoints').value) || 2;
+                        if (wanEndpoints < 2) {
+                             showMessage(`Số endpoints cho WAN Multi-Access '${name}' phải ít nhất là 2.`, 'error'); return;
+                        }
+                        hosts = wanEndpoints; // Need at least N usable IPs for N endpoints
+                    }
+                    segments.push({ name, hosts, id: entry.id, segmentType, wanEndpoints });
+                });
+
+                if (segments.length === 0) {
+                    showMessage(`Không có segment hợp lệ nào cho ${blockNameForMsg}.`, 'info');
+                    return; 
+                }
+
+                segments.sort((a, b) => {
+                    const typeOrder = { 'LAN': 1, 'WAN_MULTI': 2, 'WAN_P2P': 3 };
+                    if (typeOrder[a.segmentType] !== typeOrder[b.segmentType]) {
+                        return typeOrder[a.segmentType] - typeOrder[b.segmentType]; // LANs first, then Multi-WAN, then P2P
+                    }
+                    return b.hosts - a.hosts; // Then by host count (desc)
+                });
+
+
+                const blockNetworkMaskLong = getMaskLongFromCidr(baseCidr);
+                let currentIpLongForBlockProcessing = (blockUserGivenIpLong & blockNetworkMaskLong) >>> 0;
+                const blockBroadcastLong = (currentIpLongForBlockProcessing | ~blockNetworkMaskLong) >>> 0;
+                const sourceNetworkDisplay = `${longToIp(currentIpLongForBlockProcessing)}/${baseCidr}`;
+
+                for (const segment of segments) {
+                    const hostBits = getNeededHostBits(segment.hosts, segment.segmentType === 'WAN_P2P', segment.wanEndpoints);
+                    
+                    if (hostBits === 0 && segment.segmentType === 'LAN') {
+                         showMessage(`Không thể cấp phát cho LAN ${segment.name} (${segment.hosts} hosts) trong ${blockNameForMsg}.`, 'error');
+                         allBlocksValid = false; 
+                         continue;
+                    }
+                    const segmentCidr = 32 - hostBits;
+                    const segmentMaskLong = getMaskLongFromCidr(segmentCidr);
+                    const segmentBlockSize = 1 << hostBits;
+                    
+                    let alignedNetworkAddressLong = currentIpLongForBlockProcessing; 
+                    if ((alignedNetworkAddressLong & segmentMaskLong) !== alignedNetworkAddressLong) {
+                        alignedNetworkAddressLong = ((alignedNetworkAddressLong + segmentBlockSize - 1) & segmentMaskLong) >>> 0;
+                    }
+                    
+                    const networkAddressLong = alignedNetworkAddressLong;
+                    const broadcastAddressLong = (networkAddressLong | ~segmentMaskLong) >>> 0;
+
+                    if (networkAddressLong < (blockUserGivenIpLong & blockNetworkMaskLong) || broadcastAddressLong > blockBroadcastLong || networkAddressLong > blockBroadcastLong ) {
+                        showMessage(`Hết IP cho segment '${segment.name}' trong ${blockNameForMsg} (Dải: ${sourceNetworkDisplay}). Yêu cầu ${segment.hosts} hosts.`, 'error');
+                        allBlocksValid = false; break; 
+                    }
+                    
+                    const numUsableHosts = Math.max(0, segmentBlockSize - 2);
+                    const firstUsableIpLong = numUsableHosts > 0 ? networkAddressLong + 1 : 0;
+                    const lastUsableIpLong = numUsableHosts > 0 ? broadcastAddressLong - 1 : 0;
+                    
+                    let endpoint1Ip = 'N/A', endpoint2Ip = 'N/A', firstDeviceIpForLan = 'N/A';
+                    let nextAvailableIpForLanDevices = 0;
+
+                    if (segment.segmentType === 'WAN_P2P' || segment.segmentType === 'WAN_MULTI') {
+                        if (numUsableHosts >= 1) endpoint1Ip = longToIp(firstUsableIpLong);
+                        if (numUsableHosts >= 2) endpoint2Ip = longToIp(firstUsableIpLong + 1);
+                        firstDeviceIpForLan = 'N/A (WAN)';
+                        nextAvailableIpForLanDevices = 0; 
+                    } else { // LAN Segment
+                        if (numUsableHosts >= 1) endpoint1Ip = longToIp(firstUsableIpLong); // Router IP
+                        if (numUsableHosts >= 2) endpoint2Ip = longToIp(firstUsableIpLong + 1); // Switch IP
+                        
+                        if (numUsableHosts >= 3) {
+                            firstDeviceIpForLan = longToIp(firstUsableIpLong + 2);
+                            nextAvailableIpForLanDevices = firstUsableIpLong + 2; 
+                        } else if (numUsableHosts === 2) {
+                            firstDeviceIpForLan = 'N/A (Hết IP sau Switch)';
+                            nextAvailableIpForLanDevices = firstUsableIpLong + 2; 
+                        } else if (numUsableHosts === 1) {
+                            firstDeviceIpForLan = 'N/A (Hết IP sau Router)';
+                            nextAvailableIpForLanDevices = firstUsableIpLong + 1; 
+                        } else {
+                             firstDeviceIpForLan = 'N/A';
+                             nextAvailableIpForLanDevices = 0;
+                        }
+                    }
+
+                    const subnetDetail = {
+                        id: segment.id, 
+                        segmentType: segment.segmentType,
+                        wanEndpoints: segment.wanEndpoints,
+                        sourceNetwork: sourceNetworkDisplay,
+                        name: segment.name,
+                        networkAddress: longToIp(networkAddressLong),
+                        cidr: segmentCidr,
+                        networkAddressWithCidr: longToIp(networkAddressLong) + '/' + segmentCidr,
+                        broadcastAddress: longToIp(broadcastAddressLong),
+                        subnetMask: cidrToMask(segmentCidr),
+                        endpoint1Ip: endpoint1Ip, // Renamed for clarity
+                        endpoint2Ip: endpoint2Ip, // Renamed for clarity
+                        firstDeviceIpForLan: firstDeviceIpForLan, 
+                        lastIp: numUsableHosts > 0 ? longToIp(lastUsableIpLong) : 'N/A',
+                        numUsableHosts: numUsableHosts,
+                        firstUsableIpLong: firstUsableIpLong,
+                        lastUsableIpLong: lastUsableIpLong,
+                        nextAvailableIpForUserDevicesLong: (segment.segmentType === 'LAN') ? nextAvailableIpForLanDevices : 0,
+                        originalBlockIndex: blockIndex 
+                    };
+                    calculatedSubnetsStore.push(subnetDetail);
+
+                    const row = resultsTableBody.insertRow();
+                    row.insertCell().textContent = subnetDetail.sourceNetwork;
+                    row.insertCell().textContent = subnetDetail.name;
+                    let typeDisplay = 'LAN';
+                    if (subnetDetail.segmentType === 'WAN_P2P') typeDisplay = '<span class="font-semibold text-sky-600">WAN (P2P)</span>';
+                    else if (subnetDetail.segmentType === 'WAN_MULTI') typeDisplay = `<span class="font-semibold text-cyan-600">WAN (${subnetDetail.wanEndpoints} Endpoints)</span>`;
+                    else typeDisplay = '<span class="text-slate-600">LAN</span>';
+                    row.insertCell().innerHTML = typeDisplay;
+
+                    row.insertCell().textContent = subnetDetail.networkAddressWithCidr;
+                    row.insertCell().textContent = subnetDetail.broadcastAddress;
+                    row.insertCell().textContent = subnetDetail.subnetMask;
+                    row.insertCell().textContent = subnetDetail.endpoint1Ip;
+                    row.insertCell().textContent = subnetDetail.endpoint2Ip;
+                    row.insertCell().textContent = subnetDetail.firstDeviceIpForLan;
+                    row.insertCell().textContent = subnetDetail.lastIp;
+                    row.insertCell().textContent = subnetDetail.numUsableHosts;
+                    
+                    Array.from(row.cells).forEach(cell => {
+                        cell.className = 'table-cell-custom';
+                        cell.addEventListener('click', () => copyToClipboard(cell.textContent)); 
+                    });
+                    row.cells[row.cells.length -1].classList.add('text-right');
+
+                    currentIpLongForBlockProcessing = broadcastAddressLong + 1;
+                    
+                    if (currentIpLongForBlockProcessing > blockBroadcastLong && currentIpLongForBlockProcessing !== 0) { 
+                         if (segment !== segments[segments.length - 1]) { 
+                            showMessage(`Không đủ IP còn lại trong ${blockNameForMsg} cho segment sau '${segment.name}'.`, 'info');
+                         }
+                         break; 
+                    }
+                    if (currentIpLongForBlockProcessing === 0 && broadcastAddressLong !== 0xFFFFFFFF) { 
+                        showMessage(`Hết IPv4 trong ${blockNameForMsg} sau '${segment.name}'.`, 'error');
+                        allBlocksValid = false; break;
+                    }
+                }
+            });
+
+            if (!calculationOccurred && document.querySelectorAll('.network-block').length > 0) {
+                 showMessage('Không có khối mạng nào có segment hợp lệ để tính toán.', 'info'); return;
+            }
+            if (!calculationOccurred && document.querySelectorAll('.network-block').length === 0) {
+                 showMessage('Vui lòng thêm khối mạng và segment.', 'info'); return;
+            }
+
+            if (calculatedSubnetsStore.length > 0 && allBlocksValid) {
+                showMessage('Tính toán VLSM hoàn tất!', 'success');
+            } else if (calculatedSubnetsStore.length > 0 && !allBlocksValid) {
+                 showMessage('Tính toán VLSM hoàn tất với một số lỗi. Kiểm tra thông báo.', 'warning');
+            } else if (calculatedSubnetsStore.length === 0 && allBlocksValid && calculationOccurred) {
+                 showMessage('Không có segment hợp lệ hoặc không đủ IP.', 'info');
+            } else if (calculatedSubnetsStore.length === 0 && !allBlocksValid && calculationOccurred){
+                 showMessage('Không thể tính toán. Lỗi đầu vào hoặc không đủ IP.', 'error');
+            }
+            populateDeviceAllocationTab(); 
+        });
+
+        function copyToClipboard(text) { 
+            if (!text || text === 'N/A' || text.toLowerCase().includes('(hết ip') || text.toLowerCase().includes('(wan)')) {
+                showMessage(`Không có giá trị hợp lệ để sao chép.`, 'info', 1500); return;
+            }
+            navigator.clipboard.writeText(text).then(() => {
+                showMessage(`Đã sao chép: "${text}"`, 'success', 2000);
+            }).catch(err => {
+                showMessage('Lỗi sao chép vào clipboard.', 'error');
+                console.error('Clipboard copy failed: ', err);
+                const tempTextArea = document.createElement('textarea');
+                tempTextArea.value = text;
+                document.body.appendChild(tempTextArea);
+                tempTextArea.select();
+                try {
+                    document.execCommand('copy');
+                    showMessage(`Đã sao chép (fallback): "${text}"`, 'success', 2000);
+                } catch (execErr) {
+                    showMessage('Lỗi sao chép (fallback).', 'error');
+                    console.error('Fallback copy failed: ', execErr);
+                }
+                document.body.removeChild(tempTextArea);
+            });
+        }
+
+        // --- Device IP Allocation Tab Logic ---
+        const deviceAllocationContainer = document.getElementById('deviceAllocationContainer');
+
+        function populateDeviceAllocationTab() {
+            deviceAllocationContainer.innerHTML = ''; 
+            
+            if (calculatedSubnetsStore.length === 0) {
+                 deviceAllocationContainer.innerHTML = '<p class="text-gray-500 italic p-4 bg-slate-100 rounded-md">Chưa có dữ liệu VLSM. Vui lòng tính toán ở tab đầu tiên.</p>';
+                return;
+            }
+
+            calculatedSubnetsStore.forEach(segment => {
+                const segmentDiv = document.createElement('div');
+                segmentDiv.className = 'allocation-section'; 
+
+                if (segment.segmentType === 'WAN_P2P' || segment.segmentType === 'WAN_MULTI') {
+                    let wanTableHTML = `<h4 class="text-lg font-semibold text-sky-600 mb-3">${segment.name} (${segment.segmentType === 'WAN_P2P' ? 'WAN P2P' : `WAN ${segment.wanEndpoints} Endpoints`}: ${segment.networkAddressWithCidr})</h4>
+                                         <div class="overflow-x-auto rounded-md border border-slate-300 shadow-sm"><table class="min-w-full divide-y divide-slate-200">
+                                             <thead class="bg-slate-100">
+                                                 <tr>
+                                                     <th class="allocation-table-cell text-left text-xs font-medium text-slate-600 uppercase tracking-wider">Endpoint</th>
+                                                     <th class="allocation-table-cell text-left text-xs font-medium text-slate-600 uppercase tracking-wider">Địa chỉ IP</th>
+                                                     <th class="allocation-table-cell text-left text-xs font-medium text-slate-600 uppercase tracking-wider">Subnet Mask</th>
+                                                 </tr>
+                                             </thead><tbody class="bg-white divide-y divide-slate-200">`;
+                    let currentWanIpLong = segment.firstUsableIpLong;
+                    for (let i = 0; i < segment.wanEndpoints; i++) {
+                        if (currentWanIpLong <= segment.lastUsableIpLong) {
+                            wanTableHTML += `<tr>
+                                                <td class="allocation-table-cell font-medium">Endpoint ${i + 1}</td>
+                                                <td class="allocation-table-cell">${longToIp(currentWanIpLong)}</td>
+                                                <td class="allocation-table-cell">${segment.subnetMask}</td>
+                                             </tr>`;
+                            currentWanIpLong++;
+                        } else {
+                            wanTableHTML += `<tr><td colspan="3" class="allocation-table-cell text-orange-600">Không đủ IP cho tất cả endpoints.</td></tr>`;
+                            break;
+                        }
+                    }
+                    wanTableHTML += `</tbody></table></div>`;
+                    segmentDiv.innerHTML = wanTableHTML;
+
+                } else { // LAN Segment
+                    const canAllocateDevices = segment.numUsableHosts > 0 && segment.nextAvailableIpForUserDevicesLong > 0 && segment.nextAvailableIpForUserDevicesLong <= segment.lastUsableIpLong;
+                    segmentDiv.innerHTML = `
+                        <h4 class="text-lg font-semibold text-indigo-600 mb-3">${segment.name} (LAN: ${segment.networkAddressWithCidr})</h4>
+                        <div class="text-xs text-gray-500 mb-2 space-y-0.5">
+                            <p>Router: <strong class="text-gray-700">${segment.endpoint1Ip}</strong>, Switch: <strong class="text-gray-700">${segment.endpoint2Ip}</strong></p>
+                            <p>IP Thiết Bị Đầu Tiên (sau Switch): <strong class="text-gray-700">${segment.firstDeviceIpForLan}</strong></p>
+                            <p>Dải IP khả dụng cho thiết bị người dùng: 
+                               <strong class="text-gray-700">${canAllocateDevices ? longToIp(segment.nextAvailableIpForUserDevicesLong) : 'N/A'} - ${segment.lastIp}</strong>
+                            </p>
+                        </div>
+                        
+                        ${canAllocateDevices ? `
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 items-end my-4">
+                            <div>
+                                <label for="numDevices_${segment.id}" class="block text-sm font-medium text-gray-700 mb-1">Số thiết bị cần IP tĩnh:</label>
+                                <input type="number" id="numDevices_${segment.id}" min="0" value="3" class="input-field text-sm">
+                            </div>
+                            <div class="flex items-center space-x-3 pt-5">
+                                 <input type="checkbox" id="useDhcp_${segment.id}" class="h-4 w-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500">
+                                 <label for="useDhcp_${segment.id}" class="text-sm font-medium text-gray-700">Sử dụng DHCP cho phần còn lại</label>
+                            </div>
+                        </div>
+                        <button class="allocate-ips-btn btn btn-primary btn-sm" data-segment-id="${segment.id}">
+                            <svg class="icon-sm" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M7.5 8.25h9m-9 3H12m-6.75 3h9m-9 3h9M3.75 8.25h.007v.008H3.75V8.25Zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0ZM3.75 12h.007v.008H3.75V12Zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm-.375 3.75h.007v.008H3.75v-.008Zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm-.375 3.75h.007v.008H3.75V19.5Zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Z" /></svg>
+                            Phân bổ IP
+                        </button>
+                        ` : '<p class="text-orange-500 italic text-sm">Không đủ IP để phân bổ cho thiết bị người dùng trong LAN này.</p>'}
+                        <div id="allocationResult_${segment.id}" class="mt-5 text-sm space-y-3"></div>
+                    `;
+                }
+                deviceAllocationContainer.appendChild(segmentDiv);
+            });
+
+            deviceAllocationContainer.querySelectorAll('.allocation-table-cell').forEach(cell => {
+                cell.addEventListener('click', () => copyToClipboard(cell.textContent));
+            });
+            document.querySelectorAll('.allocate-ips-btn').forEach(button => {
+                button.addEventListener('click', handleDeviceIpAllocation);
+            });
+        }
+
+        function handleDeviceIpAllocation(event) {
+            const segmentId = event.target.dataset.segmentId;
+            const segment = calculatedSubnetsStore.find(s => s.id === segmentId);
+            if (!segment || segment.segmentType === 'WAN_P2P' || segment.segmentType === 'WAN_MULTI') { 
+                showMessage('Segment không hợp lệ hoặc là WAN link.', 'error');
+                return;
+            }
+
+            const numDevicesInput = document.getElementById(`numDevices_${segment.id}`);
+            const useDhcpCheckbox = document.getElementById(`useDhcp_${segment.id}`);
+            const resultDiv = document.getElementById(`allocationResult_${segment.id}`);
+            resultDiv.innerHTML = '';
+
+            const numStaticDevices = parseInt(numDevicesInput.value) || 0;
+            const useDhcp = useDhcpCheckbox.checked;
+
+            let currentStaticIpLong = segment.nextAvailableIpForUserDevicesLong;
+            
+            if (segment.nextAvailableIpForUserDevicesLong === 0 || segment.nextAvailableIpForUserDevicesLong > segment.lastUsableIpLong) {
+                 resultDiv.innerHTML = '<p class="text-red-500 font-medium">Không còn IP khả dụng trong dải này cho thiết bị người dùng.</p>';
+                 return;
+            }
+
+            if (numStaticDevices > 0) {
+                let staticIpTableHTML = `<h5 class="font-semibold text-gray-800 mb-2">Bảng Cấp Phát IP Tĩnh:</h5>
+                                         <div class="overflow-x-auto rounded-md border border-slate-300 shadow-sm"><table class="min-w-full divide-y divide-slate-200">
+                                             <thead class="bg-slate-100">
+                                                 <tr>
+                                                     <th class="allocation-table-cell text-left text-xs font-medium text-slate-600 uppercase tracking-wider">Thiết bị</th>
+                                                     <th class="allocation-table-cell text-left text-xs font-medium text-slate-600 uppercase tracking-wider">Địa chỉ IP</th>
+                                                     <th class="allocation-table-cell text-left text-xs font-medium text-slate-600 uppercase tracking-wider">Subnet Mask</th>
+                                                     <th class="allocation-table-cell text-left text-xs font-medium text-slate-600 uppercase tracking-wider">Default Gateway</th>
+                                                 </tr>
+                                             </thead><tbody class="bg-white divide-y divide-slate-200">`;
+                for (let i = 0; i < numStaticDevices; i++) {
+                    if (currentStaticIpLong <= segment.lastUsableIpLong) {
+                        const ip = longToIp(currentStaticIpLong);
+                        staticIpTableHTML += `<tr>
+                                                <td class="allocation-table-cell">Thiết bị ${i + 1}</td>
+                                                <td class="allocation-table-cell">${ip}</td>
+                                                <td class="allocation-table-cell">${segment.subnetMask}</td>
+                                                <td class="allocation-table-cell">${segment.endpoint1Ip}</td>
+                                             </tr>`;
+                        currentStaticIpLong++;
+                    } else {
+                        staticIpTableHTML += `<tr><td colspan="4" class="allocation-table-cell text-orange-600">Đã hết IP trong dải cho các thiết bị tĩnh còn lại.</td></tr>`;
+                        break;
+                    }
+                }
+                staticIpTableHTML += `</tbody></table></div>`;
+                resultDiv.innerHTML += staticIpTableHTML;
+            } else {
+                 resultDiv.innerHTML += '<p class="text-gray-600 italic">Không yêu cầu IP tĩnh.</p>';
+            }
+
+            if (useDhcp) {
+                const dhcpStartIpLong = currentStaticIpLong; 
+                if (dhcpStartIpLong <= segment.lastUsableIpLong) {
+                    const dhcpStartIp = longToIp(dhcpStartIpLong);
+                    const dhcpEndIp = longToIp(segment.lastUsableIpLong);
+                    const dhcpPoolSize = segment.lastUsableIpLong - dhcpStartIpLong + 1;
+                    
+                    let dhcpTableHTML = `<h5 class="font-semibold text-gray-800 mt-4 mb-2">Cấu Hình DHCP Server Đề Xuất:</h5>
+                                         <div class="overflow-x-auto rounded-md border border-slate-300 shadow-sm"><table class="min-w-full divide-y divide-slate-200">
+                                             <thead class="bg-slate-100">
+                                                 <tr>
+                                                     <th class="allocation-table-cell text-left text-xs font-medium text-slate-600 uppercase tracking-wider">Tham số</th>
+                                                     <th class="allocation-table-cell text-left text-xs font-medium text-slate-600 uppercase tracking-wider">Giá trị</th>
+                                                 </tr>
+                                             </thead><tbody class="bg-white divide-y divide-slate-200">
+                                             <tr><td class="allocation-table-cell font-medium">Default Gateway</td><td class="allocation-table-cell">${segment.endpoint1Ip}</td></tr>
+                                             <tr><td class="allocation-table-cell font-medium">Subnet Mask</td><td class="allocation-table-cell">${segment.subnetMask}</td></tr>
+                                             <tr><td class="allocation-table-cell font-medium">Start IP Address (Pool)</td><td class="allocation-table-cell">${dhcpStartIp}</td></tr>
+                                             <tr><td class="allocation-table-cell font-medium">End IP Address (Pool)</td><td class="allocation-table-cell">${dhcpEndIp}</td></tr>
+                                             <tr><td class="allocation-table-cell font-medium">Số Lượng IP Cấp Phát</td><td class="allocation-table-cell">${dhcpPoolSize.toLocaleString()}</td></tr>
+                                             <tr><td class="allocation-table-cell font-medium">DNS Server (Gợi ý)</td><td class="allocation-table-cell">8.8.8.8, 1.1.1.1</td></tr>
+                                         </tbody></table></div>`;
+                    resultDiv.innerHTML += dhcpTableHTML;
+                } else {
+                    resultDiv.innerHTML += '<p class="text-orange-600 font-medium mt-4">Không còn IP khả dụng cho DHCP sau khi cấp phát tĩnh.</p>';
+                }
+            }
+            
+            resultDiv.querySelectorAll('.allocation-table-cell').forEach(cell => {
+                cell.addEventListener('click', () => copyToClipboard(cell.textContent));
+            });
+
+            if (resultDiv.innerHTML.trim() === '') {
+                resultDiv.innerHTML = '<p class="text-gray-500 italic">Nhập số thiết bị và tùy chọn DHCP, sau đó nhấn nút để xem phân bổ.</p>';
+            }
+        }
+
+
+        // --- CLI Generator Logic ---
+        const generateCliBtn = document.getElementById('generateCliBtn');
+        const cliResultsContainer = document.getElementById('cliResultsContainer');
+
+        generateCliBtn.addEventListener('click', () => {
+            const configName = document.getElementById('configName').value || "DEFAULT_ID";
+            const bannerUser = document.getElementById('bannerUser').value || "Default User";
+            cliResultsContainer.innerHTML = ''; 
+
+            if (calculatedSubnetsStore.length === 0) {
+                showMessage('Chưa có dữ liệu VLSM. Tính toán trước.', 'info'); return;
+            }
+            let cliGeneratedCount = 0;
+            calculatedSubnetsStore.forEach((subnet, globalIndex) => {
+                if (subnet.segmentType === 'WAN_P2P' || subnet.segmentType === 'WAN_MULTI' || subnet.numUsableHosts < 2 || subnet.endpoint2Ip === 'N/A' || subnet.endpoint1Ip === 'N/A') {
+                    return; 
+                }
+                const switchNumberForHostname = globalIndex + 1; 
+                const hostname = `SW${switchNumberForHostname}_${configName}`;
+                const cliCommands = `enable
+configure terminal
+hostname ${hostname}
+banner motd #Switch ${switchNumberForHostname} Configed by ${bannerUser}#
+enable secret 123
+enable password 123
+line console 0
+password 123
+login
+exit
+line vty 0 15
+password 123
+login
+exit
+service password-encryption
+interface vlan 1
+ip address ${subnet.endpoint2Ip} ${subnet.subnetMask}
+no shut
+exit
+ip default-gateway ${subnet.endpoint1Ip}
+exit
+write memory`; 
+
+                const cliDiv = document.createElement('div');
+                cliDiv.className = 'p-4 bg-gray-800 text-gray-100 rounded-lg shadow-md';
+                cliDiv.innerHTML = `
+                    <h3 class="text-lg font-semibold text-teal-400 mb-2 flex justify-between items-center">
+                        <span>Cấu hình cho: ${subnet.name} (Switch ${switchNumberForHostname})</span>
+                        <span class="text-xs text-gray-400">${subnet.sourceNetwork}</span>
+                    </h3>
+                    <pre class="whitespace-pre-wrap text-sm leading-relaxed overflow-x-auto p-3 bg-gray-900 rounded-md">${cliCommands}</pre>
+                    <button class="copy-cli-btn mt-3 btn btn-primary btn-sm bg-sky-500 hover:bg-sky-600">
+                        <svg class="icon-sm" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M15.666 3.888A2.25 2.25 0 0 0 13.5 2.25h-3c-1.03 0-1.9.693-2.166 1.638m7.332 0c.055.194.084.4.084.612v0a.75.75 0 0 1-.75.75H9a.75.75 0 0 1-.75-.75v0c0-.212.03-.418.084-.612m7.332 0c.646.049 1.288.11 1.927.184 1.1.128 1.907 1.077 1.907 2.185V19.5a2.25 2.25 0 0 1-2.25 2.25H6.75A2.25 2.25 0 0 1 4.5 19.5V6.257c0-1.108.806-2.057 1.907-2.185a48.208 48.208 0 0 1 1.927-.184" /></svg>
+                        Copy Lệnh
+                    </button>
+                `;
+                cliDiv.querySelector('.copy-cli-btn').addEventListener('click', () => copyToClipboard(cliCommands));
+                cliResultsContainer.appendChild(cliDiv);
+                cliGeneratedCount++;
+            });
+             if (cliGeneratedCount > 0) {
+                showMessage('Đã tạo lệnh CLI cho Switch!', 'success');
+            } else if (calculatedSubnetsStore.length > 0 && cliGeneratedCount === 0) {
+                showMessage('Không có LAN segment phù hợp để tạo CLI cho Switch.', 'info');
+            }
+        });
+
+        // --- Packet Tracer Tools Tab Logic ---
+        const subnetLookupTableBody = document.getElementById('subnetLookupTable').getElementsByTagName('tbody')[0];
+        const defaultRouteInterfaceInput = document.getElementById('defaultRouteInterface');
+        const defaultRouteCommandPreview = document.getElementById('defaultRouteCommandPreview');
+
+        if(defaultRouteInterfaceInput) {
+            defaultRouteInterfaceInput.addEventListener('input', (e) => {
+                const interfaceName = e.target.value || 'Serial0/0/0';
+                defaultRouteCommandPreview.textContent = `ip route 0.0.0.0 0.0.0.0 ${interfaceName}`;
+            });
+        }
+        
+        const subnetData = [
+            { prefix: 32, mask: "255.255.255.255", bits: 0, totalHosts: 1, usableHosts: 1 }, 
+            { prefix: 31, mask: "255.255.255.254", bits: 1, totalHosts: 2, usableHosts: 2 }, 
+            { prefix: 30, mask: "255.255.255.252", bits: 2, totalHosts: 4, usableHosts: 2 },
+            { prefix: 29, mask: "255.255.255.248", bits: 3, totalHosts: 8, usableHosts: 6 },
+            { prefix: 28, mask: "255.255.255.240", bits: 4, totalHosts: 16, usableHosts: 14 },
+            { prefix: 27, mask: "255.255.255.224", bits: 5, totalHosts: 32, usableHosts: 30 },
+            { prefix: 26, mask: "255.255.255.192", bits: 6, totalHosts: 64, usableHosts: 62 },
+            { prefix: 25, mask: "255.255.255.128", bits: 7, totalHosts: 128, usableHosts: 126 },
+            { prefix: 24, mask: "255.255.255.0", bits: 8, totalHosts: 256, usableHosts: 254 },
+            { prefix: 23, mask: "255.255.254.0", bits: 9, totalHosts: 512, usableHosts: 510 },
+            { prefix: 22, mask: "255.255.252.0", bits: 10, totalHosts: 1024, usableHosts: 1022 },
+            { prefix: 21, mask: "255.255.248.0", bits: 11, totalHosts: 2048, usableHosts: 2046 },
+            { prefix: 20, mask: "255.255.240.0", bits: 12, totalHosts: 4096, usableHosts: 4094 },
+            { prefix: 19, mask: "255.255.224.0", bits: 13, totalHosts: 8192, usableHosts: 8190 },
+            { prefix: 18, mask: "255.255.192.0", bits: 14, totalHosts: 16384, usableHosts: 16382 },
+            { prefix: 17, mask: "255.255.128.0", bits: 15, totalHosts: 32768, usableHosts: 32766 },
+            { prefix: 16, mask: "255.255.0.0", bits: 16, totalHosts: 65536, usableHosts: 65534 },
+            { prefix: 15, mask: "255.254.0.0", bits: 17, totalHosts: 131072, usableHosts: 131070 },
+            { prefix: 14, mask: "255.252.0.0", bits: 18, totalHosts: 262144, usableHosts: 262142 },
+            { prefix: 13, mask: "255.248.0.0", bits: 19, totalHosts: 524288, usableHosts: 524286 },
+            { prefix: 12, mask: "255.240.0.0", bits: 20, totalHosts: 1048576, usableHosts: 1048574 },
+            { prefix: 11, mask: "255.224.0.0", bits: 21, totalHosts: 2097152, usableHosts: 2097150 },
+            { prefix: 10, mask: "255.192.0.0", bits: 22, totalHosts: 4194304, usableHosts: 4194302 },
+            { prefix: 9,  mask: "255.128.0.0", bits: 23, totalHosts: 8388608, usableHosts: 8388606 },
+            { prefix: 8,  mask: "255.0.0.0", bits: 24, totalHosts: 16777216, usableHosts: 16777214 },
+            { prefix: 7,  mask: "254.0.0.0", bits: 25, totalHosts: 33554432, usableHosts: 33554430 },
+            { prefix: 6,  mask: "252.0.0.0", bits: 26, totalHosts: 67108864, usableHosts: 67108862 },
+            { prefix: 5,  mask: "248.0.0.0", bits: 27, totalHosts: 134217728, usableHosts: 134217726 },
+            { prefix: 4,  mask: "240.0.0.0", bits: 28, totalHosts: 268435456, usableHosts: 268435454 },
+            { prefix: 3,  mask: "224.0.0.0", bits: 29, totalHosts: 536870912, usableHosts: 536870910 },
+            { prefix: 2,  mask: "192.0.0.0", bits: 30, totalHosts: 1073741824, usableHosts: 1073741822 },
+            { prefix: 1,  mask: "128.0.0.0", bits: 31, totalHosts: 2147483648, usableHosts: 2147483646 },
+            { prefix: 0,  mask: "0.0.0.0",   bits: 32, totalHosts: 4294967296, usableHosts: 4294967294 },
+        ];
+
+        function populateSubnetLookupTable() {
+            if (subnetLookupTableBody.childElementCount > 0 && subnetLookupTableBody.childElementCount === subnetData.length) return; 
+            subnetLookupTableBody.innerHTML = ''; 
+            subnetData.forEach(data => {
+                const row = subnetLookupTableBody.insertRow();
+                row.insertCell().textContent = `/${data.prefix}`;
+                row.insertCell().textContent = data.mask;
+                row.insertCell().textContent = ipToBinary(data.mask);
+                row.insertCell().textContent = data.bits;
+                row.insertCell().textContent = data.totalHosts.toLocaleString();
+                row.insertCell().textContent = data.usableHosts.toLocaleString();
+                Array.from(row.cells).forEach(cell => cell.className = 'table-cell-custom');
+                row.cells[3].classList.add('text-right');
+                row.cells[4].classList.add('text-right');
+                row.cells[5].classList.add('text-right');
+            });
+        }
+        
+        const copyDefaultRouteBtn = document.getElementById('copyDefaultRouteBtn');
+        if(copyDefaultRouteBtn) {
+            copyDefaultRouteBtn.addEventListener('click', () => {
+                const interfaceName = document.getElementById('defaultRouteInterface').value || 'Serial0/0/0';
+                copyToClipboard(`ip route 0.0.0.0 0.0.0.0 ${interfaceName}`);
+            });
+        }
+
+        // Initialize
+        createNetworkBlockHTML(); 
+        document.querySelector('.tab-button[data-tab="calculator"]').click(); 
+
+    </script>
+</body>
+</html>
